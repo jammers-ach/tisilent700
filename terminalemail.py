@@ -91,5 +91,4 @@ class EmailApp(TerminalApp):
             for mail in mails:
                 logger.info("Received an email from %s", mail['from'])
                 self.send(format_email(mail))
-                self.ser.send_line()
             self.sleep(SLEEP_TIME)

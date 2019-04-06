@@ -74,6 +74,8 @@ class TerminalSerial():
         if self.is_null(value):
             raise InterruptException
         else:
+            if seconds - elapsed <= 0:
+                return
             self.sleep(seconds - elapsed)
 
     def read_char(self, echo=True):
