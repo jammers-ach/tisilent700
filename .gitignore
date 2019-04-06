@@ -90,3 +90,7 @@ ENV/
 
 # SQL lite db
 *.sqlite3
+
+
+./CREDS
+./creds

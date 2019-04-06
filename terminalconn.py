@@ -15,9 +15,14 @@ class TerminalSerial():
                            stopbits=stopbits,
                            bytesize=bytesize)
 
+        self.terminal_width = 30
+
 
     def close(self):
         self.ser.close()
+
+    def __exit__(self):
+        self.close()
 
 
     def send_text(self, text):
@@ -27,5 +32,9 @@ class TerminalSerial():
             text += '\n'
 
         data = text.replace('\n', '\r\n').encode('ascii', 'replace')
-
         self.ser.write(data)
+
+    def send_line(self):
+        '''Prints a horizontal line'''
+        line = '=' * self.terminal_width
+        self.send_text('\n{}'.format(line))
