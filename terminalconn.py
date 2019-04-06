@@ -1,4 +1,6 @@
 import serial
+import sys
+import time
 from datetime import datetime
 
 brokenkeys_lookup = {
@@ -112,3 +114,41 @@ class TerminalSerial():
                 full_response += read_char
 
         return full_response
+
+
+class DummySerial():
+    '''A dummy class for development that prints/reads to standard out'''
+
+    def __init__(self):
+        self.brokenkeys = {}
+        pass
+
+    def close(self):
+        pass
+
+    def __exit__(self):
+        pass
+
+
+    def send_text(self, text, trailing_newline=True):
+        '''convenient function to wrap a block of text with the
+        correct newlines and send it'''
+        if trailing_newline:
+            print(text)
+        else:
+            print(text, end="")
+
+    def send_line(self):
+        '''Prints a horizontal line'''
+        line = '=' * self.terminal_width
+        self.send_text('\n{}'.format(line))
+
+
+    def sleep(self, seconds):
+        time.sleep(seconds)
+
+    def read_char(self, echo=True):
+        return sys.stdin.read(1)
+
+    def read_line(self, echo=True):
+        return input("")

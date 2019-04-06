@@ -1,6 +1,6 @@
 import logging
 
-from terminalconn import TerminalSerial, InterruptException
+from terminalconn import TerminalSerial, DummySerial, InterruptException
 from terminalapp import TerminalApp
 from simplegame import SimpleGame
 from terminalemail import EmailApp
@@ -59,5 +59,14 @@ class MainTerminal(TerminalApp):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    tg = MainTerminal(TerminalSerial())
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument("-d", "--dummy",
+                        action="store_true", dest="dummy", default=False,
+                        help="Use stdin/out rather than serial port")
+
+    args = parser.parse_args()
+    connection = DummySerial() if args.dummy < 2 else TerminalSerial()
+    tg = MainTerminal(connection)
     tg.start()
