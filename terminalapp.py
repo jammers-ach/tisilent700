@@ -1,4 +1,5 @@
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,20 @@ class TerminalApp():
 
     def send(self, text):
         self.serial.send_text(text)
+
+    def print_broken_keys(self):
+        '''prints a little helptext for broken keys'''
+        if self.serial.brokenkeys == {}:
+            # no broken keys
+            return
+        self.send("This terminal has broken keys: ")
+        text = ''
+        for i,k in self.serial.brokenkeys.items():
+            if k == " ":
+                text += "Press '{}' for SPACE, ".format(i)
+            else:
+                text += "Press '{}' for '{}', ".format(i, k)
+        self.send(text)
 
     def prompt(self, text=""):
         '''Sends a question waits for a response
@@ -36,34 +51,6 @@ class TerminalApp():
     def start(self):
         raise NotImplemented("Application doesn't have start method")
 
+    def sleep(self, seconds):
+        self.serial.sleep(seconds)
 
-class TestApp(TerminalApp):
-
-    def start(self):
-        self.send("I will ask your name, do you a) agree b) disagree?")
-        char = ''
-        while char != 'a' and char != 'b':
-            char = self.read_key("> ")
-            self.send("")
-
-        if char == 'a':
-            name = self.prompt("\nWhat is your name? ")
-            self.send("Hello {}".format(name))
-        self.send("Welcome to the game. What is the magic keyword?")
-
-        self.playing = True
-        while self.playing:
-            response = self.prompt("> ")
-            if response == 'test':
-                self.playing = False
-                self.send("Goodbye")
-            else:
-                self.send("You said \"{}\" this is wrong".format(response))
-
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-    from terminalconn import TerminalSerial
-    tg = TestApp(TerminalSerial())
-    tg.start()

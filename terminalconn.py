@@ -1,10 +1,15 @@
 import serial
+from datetime import datetime
 
 brokenkeys_lookup = {
     ':': ' ',
     ';': 'F',
     '-': 'G'
 }
+
+
+class InterruptException(Exception):
+    pass
 
 class TerminalSerial():
     '''A class to communicate with the TI slient 700'''
@@ -51,13 +56,38 @@ class TerminalSerial():
     def _isnewline(self, char):
         return char == '\r' or char == '\n'
 
+    def is_null(self, data):
+        return data == b'\x00'
+
+    def sleep(self, seconds):
+        '''Sleeps for a time,
+
+        but will listen for break keys to intterrupt'''
+
+        t1 = datetime.now()
+        self.ser.timeout = seconds
+        value = self.ser.read()
+        self.ser.timeout = None
+        t2 = datetime.now()
+        elapsed  = (t2 - t1).total_seconds()
+
+        if self.is_null(value):
+            raise InterruptException
+        else:
+            self.sleep(seconds - elapsed)
+
     def read_char(self, echo=True):
         '''Reads a single character, echoing back to the serial port
         and translating to sring.
 
         We expect the serial port to be in half duplex so its our
         responsibility to echo'''
-        read_char = self.ser.read(1).decode('ascii')
+        read_char = self.ser.read(1)
+
+        if self.is_null(read_char):
+            raise InterruptException
+
+        read_char = read_char.decode('ascii')
         if self._isnewline(read_char):
             self.ser.write('\r\n'.encode('ascii'))
         else:

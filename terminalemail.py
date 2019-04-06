@@ -7,6 +7,8 @@ import email
 
 import logging
 
+from terminalapp import TerminalApp
+
 logger = logging.getLogger(__name__)
 
 
@@ -68,23 +70,26 @@ Subject: {subject}
         body = email.get_payload()
 
     template = template.format(sender=email['from'],
-        to=mail['to'],
-        date=mail['date'],
+        to=email['to'],
+        date=email['date'],
         subject=email['Subject'],
         body=body)
 
     return template
 
 
+class EmailApp(TerminalApp):
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-    from terminalconn import TerminalSerial
-    s = TerminalSerial()
-    mails = readmail()
-    while True:
-        for mail in mails:
-            logger.info("Received an email from %s", mail['from'])
-            s.send_text(format_email(mail))
-            s.send_line()
-        time.sleep(SLEEP_TIME)
+    def start(self):
+
+        if FROM_PWD is None or FROM_EMAIL is None:
+            self.send("There are no email credentials, exiting")
+            return
+
+        mails = readmail()
+        while True:
+            for mail in mails:
+                logger.info("Received an email from %s", mail['from'])
+                self.send(format_email(mail))
+                self.ser.send_line()
+            self.sleep(SLEEP_TIME)
