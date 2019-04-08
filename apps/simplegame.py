@@ -1,4 +1,4 @@
-from terminalapp import TerminalApp
+from ti700.app import TerminalApp
 from random import randint
 
 class SimpleGame(TerminalApp):

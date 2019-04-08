@@ -7,7 +7,7 @@ import email
 
 import logging
 
-from terminalapp import TerminalApp
+from ti700.app import TerminalApp
 
 logger = logging.getLogger(__name__)
 

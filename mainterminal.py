@@ -1,9 +1,9 @@
 import logging
 
-from terminalconn import TerminalSerial, DummySerial, InterruptException
-from terminalapp import TerminalApp
-from simplegame import SimpleGame
-from terminalemail import EmailApp
+from ti700.conn import TerminalSerial, DummySerial, InterruptException
+from ti700.app import TerminalApp
+from apps.simplegame import SimpleGame
+from apps.terminalemail import EmailApp
 
 logger = logging.getLogger(__name__)
 
