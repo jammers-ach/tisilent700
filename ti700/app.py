@@ -9,6 +9,10 @@ class TerminalApp():
     '''Base class for a terminal game
     provides send and read mechanims'''
 
+    @classmethod
+    def _name(cls):
+
+        return cls.appname if hasattr(cls, 'appname') else "Unnamed application"
 
     def __init__(self, serial):
         self.serial = serial

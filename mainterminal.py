@@ -2,13 +2,13 @@ import logging
 
 from ti700.conn import TerminalSerial, DummySerial, InterruptException
 from ti700.app import TerminalApp
-from apps.simplegame import SimpleGame
-from apps.terminalemail import EmailApp
+from apps import all_apps
 
 logger = logging.getLogger(__name__)
 
 
 class SleepTest(TerminalApp):
+    appname = "Sleep test"
 
     def start(self):
         self.send("sleep test")
@@ -17,12 +17,9 @@ class SleepTest(TerminalApp):
 
 class MainTerminal(TerminalApp):
 
-    apps = [
-        ('sleep test', SleepTest),
-        ('a game', SimpleGame),
-        ('email checker', EmailApp),
-    ]
+
     def start(self):
+        self.apps = all_apps()
         while True:
             self.send("TI Slient 700 app")
             self.print_broken_keys()
@@ -43,8 +40,8 @@ class MainTerminal(TerminalApp):
     def prompt_applist(self):
         '''Prompts the user for the chosen app,
         returns the class of the app they chose'''
-        for i, p in enumerate(self.apps):
-            app_name, _ = p
+        for i, app in enumerate(self.apps):
+            app_name = app._name()
             self.send("{}) for {}".format(i+1, app_name))
 
         chosen = None
@@ -54,7 +51,7 @@ class MainTerminal(TerminalApp):
                 chosen = int(key)
             except ValueError:
                 chosen = None
-        return self.apps[chosen-1][1]
+        return self.apps[chosen-1]
 
 
 if __name__ == '__main__':

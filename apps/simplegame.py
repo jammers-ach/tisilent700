@@ -3,6 +3,7 @@ from random import randint
 
 class SimpleGame(TerminalApp):
     money = 100
+    appname = "a simple game"
     name = ""
 
     horses = [

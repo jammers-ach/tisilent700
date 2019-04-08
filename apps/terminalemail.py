@@ -79,6 +79,7 @@ Subject: {subject}
 
 
 class EmailApp(TerminalApp):
+    appname = "email checker"
 
     def start(self):
 
