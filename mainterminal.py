@@ -21,7 +21,9 @@ class MainTerminal(TerminalApp):
     def start(self):
         self.apps = all_apps()
         while True:
-            self.send("TI Slient 700 app")
+            banner = "TI Slient 700 app"
+            leading_spaces = int((self.serial.terminal_width - len(banner)) / 2)
+            self.send((" "*leading_spaces) + banner)
             self.print_broken_keys()
 
             try:

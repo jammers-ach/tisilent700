@@ -1,6 +1,7 @@
 import serial
 import sys
 import time
+import getch
 from datetime import datetime
 
 brokenkeys_lookup = {
@@ -29,7 +30,7 @@ class TerminalSerial():
                            stopbits=stopbits,
                            bytesize=bytesize)
 
-        self.terminal_width = 30
+        self.terminal_width = 80
 
         self.brokenkeys = brokenkeys
 
@@ -118,6 +119,9 @@ class TerminalSerial():
 
 class DummySerial():
     '''A dummy class for development that prints/reads to standard out'''
+    _printspeed = 1/30
+    terminal_width = 80
+    line_log = 0
 
     def __init__(self):
         self.brokenkeys = {}
@@ -129,14 +133,29 @@ class DummySerial():
     def __exit__(self):
         pass
 
+    def _slow_print(self, text):
+        '''emulates the cool 30 characters a second the ti slient 700 can aparently print at'''
+        for c in text:
+            print(c, end="")
+
+            if c == '\n':
+                self.line_log = 0
+            else:
+                self.line_log += 1
+                if self.line_log > self.terminal_width:
+                    print('\n', end="")
+                    self.line_log = 0
+
+            sys.stdout.flush()
+            time.sleep(self._printspeed)
 
     def send_text(self, text, trailing_newline=True):
         '''convenient function to wrap a block of text with the
         correct newlines and send it'''
-        if trailing_newline:
-            print(text)
-        else:
-            print(text, end="")
+        if trailing_newline and (text == '' or text[-1] != '\n'):
+            text += '\n'
+
+        self._slow_print(text)
 
     def send_line(self):
         '''Prints a horizontal line'''
@@ -148,7 +167,7 @@ class DummySerial():
         time.sleep(seconds)
 
     def read_char(self, echo=True):
-        return sys.stdin.read(1)
+        return getch.getche()
 
     def read_line(self, echo=True):
         return input("")
