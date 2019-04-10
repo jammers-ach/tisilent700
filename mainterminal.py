@@ -1,6 +1,6 @@
 import logging
 
-from ti700.conn import TerminalSerial, DummySerial, InterruptException
+from ti700.conn import BrokenSerialIO, InterruptException
 from ti700.app import TerminalApp
 from apps import all_apps
 
@@ -66,6 +66,7 @@ if __name__ == '__main__':
                         help="Use stdin/out rather than serial port")
 
     args = parser.parse_args()
-    connection = DummySerial() if args.dummy < 2 else TerminalSerial()
+
+    connection = DummySerial() if args.dummy else BrokenSerialIO()
     tg = MainTerminal(connection)
     tg.start()
