@@ -1,13 +1,18 @@
 import logging
+from datetime import datetime
 import time
 
 logger = logging.getLogger(__name__)
 
 
+class InterruptException(Exception):
+    pass
 
 class TerminalApp():
     '''Base class for a terminal game
     provides send and read mechanims'''
+
+    terminal_width = 80
 
     @classmethod
     def _name(cls):
@@ -17,8 +22,12 @@ class TerminalApp():
     def __init__(self, serial):
         self.serial = serial
 
-    def send(self, text):
-        self.serial.send_text(text)
+    def send(self, text, trailing_newline=True):
+        if trailing_newline and (text == '' or text[-1] != '\n'):
+            text += '\n'
+        data = text.replace('\n', '\r\n').encode('ascii', 'replace')
+
+        self.serial.write(data)
 
     def print_broken_keys(self):
         '''prints a little helptext for broken keys'''
@@ -34,6 +43,10 @@ class TerminalApp():
                 text += "Press '{}' for '{}', ".format(i, k)
         self.send(text)
 
+
+    def read_line(self):
+        return self.serial.readline().decode('ascii')[0:-1]
+
     def prompt(self, text=""):
         '''Sends a question waits for a response
 
@@ -41,20 +54,41 @@ class TerminalApp():
         user then presses types a response and return key
         and this function returns that response
         '''
-        self.serial.send_text(text, trailing_newline=False)
-        response = self.serial.read_line().lower()
+        self.send(text, trailing_newline=False)
+        response = self.read_line().lower()
         return response
+
+    def read_char(self):
+        '''Reads a single character, echoing back to the serial port
+        and translating to sring.
+
+        We expect the serial port to be in half duplex so its our
+        responsibility to echo'''
+        read_char = self.serial.read(1).decode('ascii')
+        return read_char
 
     def read_key(self, text=""):
         '''Reads a single charater response, without
         wiating for a newline'''
-        self.serial.send_text(text, trailing_newline=False)
-        response = self.serial.read_char().lower()
+        self.send(text, trailing_newline=False)
+        response = self.read_char().lower()
         return response
 
     def start(self):
         raise NotImplemented("Application doesn't have start method")
 
     def sleep(self, seconds):
-        self.serial.sleep(seconds)
+        t1 = datetime.now()
+        self.serial.timeout = seconds
+        value = self.serial.read()
+        self.serial.timeout = None
+        t2 = datetime.now()
+        elapsed  = (t2 - t1).total_seconds()
+
+        if value == b'\0':
+            raise InterruptException
+        else:
+            if seconds - elapsed <= 0:
+                return
+            self.sleep(seconds - elapsed)
 

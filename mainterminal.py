@@ -1,7 +1,8 @@
 import logging
 
-from ti700.conn import TerminalSerial, DummySerial, InterruptException
-from ti700.app import TerminalApp
+from ti700.conn import BrokenSerialIO, DummySerial
+from ti700.app import TerminalApp, InterruptException
+
 from apps import all_apps
 
 logger = logging.getLogger(__name__)
@@ -17,12 +18,11 @@ class SleepTest(TerminalApp):
 
 class MainTerminal(TerminalApp):
 
-
     def start(self):
         self.apps = all_apps()
         while True:
             banner = "TI Slient 700 app"
-            leading_spaces = int((self.serial.terminal_width - len(banner)) / 2)
+            leading_spaces = int((self.terminal_width - len(banner)) / 4)
             self.send((" "*leading_spaces) + banner)
             self.print_broken_keys()
 
@@ -66,6 +66,7 @@ if __name__ == '__main__':
                         help="Use stdin/out rather than serial port")
 
     args = parser.parse_args()
-    connection = DummySerial() if args.dummy < 2 else TerminalSerial()
+
+    connection = DummySerial() if args.dummy else BrokenSerialIO()
     tg = MainTerminal(connection)
     tg.start()
