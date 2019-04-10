@@ -1,14 +1,18 @@
 import logging
-import datetime
+from datetime import datetime
 import time
 
 logger = logging.getLogger(__name__)
 
 
+class InterruptException(Exception):
+    pass
 
 class TerminalApp():
     '''Base class for a terminal game
     provides send and read mechanims'''
+
+    terminal_width = 80
 
     @classmethod
     def _name(cls):
@@ -41,7 +45,7 @@ class TerminalApp():
 
 
     def read_line(self):
-        return self.serial.readline()
+        return self.serial.readline().decode('ascii')[0:-1]
 
     def prompt(self, text=""):
         '''Sends a question waits for a response
@@ -75,13 +79,13 @@ class TerminalApp():
 
     def sleep(self, seconds):
         t1 = datetime.now()
-        self.ser.timeout = seconds
-        value = self.ser.read()
-        self.ser.timeout = None
+        self.serial.timeout = seconds
+        value = self.serial.read()
+        self.serial.timeout = None
         t2 = datetime.now()
         elapsed  = (t2 - t1).total_seconds()
 
-        if self.is_null(value):
+        if value == b'\0':
             raise InterruptException
         else:
             if seconds - elapsed <= 0:

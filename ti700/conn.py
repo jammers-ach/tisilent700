@@ -1,4 +1,5 @@
 import serial
+import io
 import sys
 import time
 import getch
@@ -9,10 +10,6 @@ brokenkeys_lookup = {
     ';': 'F',
     '-': 'G'
 }
-
-
-class InterruptException(Exception):
-    pass
 
 
 class BrokenSerialIO(serial.Serial):
@@ -52,8 +49,9 @@ class BrokenSerialIO(serial.Serial):
                     self.write('\r\n'.encode('ascii'))
                     line.append(b'\n')
                 else:
+                    c = self._replace(c)
                     self.write(c)
-                    line.append(self._replace(c))
+                    line.append(c)
 
             if size == 1:
                 return line[0]
@@ -82,4 +80,33 @@ class BrokenSerialIO(serial.Serial):
         result = super(BrokenSerialIO, self).write(data)
         return result
 
+
+
+class DummySerial(io.IOBase):
+    '''A class to mimic the size and speed of the
+    ti 700'''
+    printspeed = 1/30 # 30 characters a second
+
+    def __init__(self):
+        self.echo = True
+        self.brokenkeys = {}
+        # workaround for the serial timeout
+        self.timeout = None
+
+    def read(self, size=1):
+        if self.timeout:
+            time.sleep(self.timeout)
+            return
+
+        if self.echo:
+            char = getch.getche()
+        else:
+            char = getch.getch()
+        return char.encode('ascii')
+
+    def write(self, data):
+        for c in data.decode('ascii'):
+            print(c, end="")
+            sys.stdout.flush()
+            time.sleep(self.printspeed)
 
