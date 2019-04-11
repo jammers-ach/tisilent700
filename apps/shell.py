@@ -1,36 +1,36 @@
 from ti700.app import TerminalApp
+import os
+import sys
+import select
+import termios
+import tty
+import pty
+from subprocess import Popen
 
-import io
-import subprocess
-
-class TiIO(io.RawIOBase):
-
-    def __init__(self, terminal):
-        self.ser = terminal
-
-
-    def read(self):
-        return self.ser.read_char().decode('ascii')
-
-    def write(self, b):
-        self.send_text(b.encode('ascii'), trailing_newline=False)
-
-    def fileno(self):
-        return 1
 
 class Shell(TerminalApp):
-    appname = "shell"
+    appname = "unix"
+    command = '/bin/sh'
 
     def start(self):
-
         self.print_broken_keys()
 
-        io = TiIO(self.serial)
-
-        p = subprocess.Popen('sh', bufsize=0,
-                             preexec_fn=os.setsid,
-                             stdout=io,
-                             stderr=io, shell=True)
+        master_fd, slave_fd = pty.openpty()
+        p = Popen(self.command,
+                preexec_fn=os.setsid,
+                stdin=slave_fd,
+                stdout=slave_fd,
+                stderr=slave_fd,
+                universal_newlines=True)
 
         while p.poll() is None:
-            pass
+            r, w, e = select.select([self.serial, master_fd], [], [])
+            if sys.stdin in r:
+                d = os.read(self.serial.fileno(), 10240)
+                os.write(master_fd, d)
+            elif master_fd in r:
+                o = os.read(master_fd, 10240)
+                if o:
+                    o = o.decode('utf-8').upper().encode('utf-8')
+                    os.write(self.serial.fileno(), o)
+

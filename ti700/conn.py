@@ -82,7 +82,7 @@ class BrokenSerialIO(serial.Serial):
 
 
 
-class DummySerial(io.IOBase):
+class DummySerial(io.RawIOBase):
     '''A class to mimic the size and speed of the
     ti 700'''
     printspeed = 1/30 # 30 characters a second

@@ -76,7 +76,7 @@ class SimpleGame(TerminalApp):
             try:
                 bet = float(read)
             except ValueError:
-                bet = Nobne
+                bet = None
             if bet and  bet > self.money:
                 self.send("{} you only have ${}".format(self.name, self.money))
                 bet = None
