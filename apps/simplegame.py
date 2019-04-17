@@ -1,5 +1,6 @@
 from ti700.app import TerminalApp
 import random
+import json
 
 class SimpleGame(TerminalApp):
     money = 100
@@ -16,13 +17,37 @@ class SimpleGame(TerminalApp):
         'Triuphant horse'
     ]
 
+    wins = {}
+    house_balance = 0
+    wins_file = '.horse_data'
+
+
     def start(self):
+
+        self.load_wins()
         self.send("Welcome to the Horse races")
 
         self.name = self.prompt("\nWhat is your name? ")
         self.sleep(1)
 
         self.play()
+
+
+    def load_wins(self):
+        try:
+            with open(self.wins_file) as f:
+                data = json.load(f)
+                self.wins = data.get('wins', {})
+                self.house_balance = data.get('balance', 0)
+        except FileNotFoundError:
+            return
+
+    def save_wins(self):
+        with open(self.wins_file, 'w') as f:
+            json.dump({'wins':self.wins,
+                       'balance': self.house_balance}, f)
+
+
 
     def play(self):
         while self.money > 0:
@@ -38,8 +63,9 @@ class SimpleGame(TerminalApp):
                 winner = self.race(horse_list)
             if key == 'a':
                 horse, bet = self.get_bet(horse_list)
-                winner = self.race(horse_list)
+                self.house_balance += bet
                 self.money -= bet
+                winner = self.race(horse_list)
                 if winner != horse:
                     self.send("Unlucky!!!")
                     self.sleep(1)
@@ -49,7 +75,9 @@ class SimpleGame(TerminalApp):
                     self.sleep(1)
                     winnings = bet * len(horse_list)
                     self.send("You won ${}".format(winnings))
-                    self.money += bet * len(winnings)
+                    self.money += winnings
+                    self.house_balance -= bet
+                self.save_wins()
 
         self.send("Sorry you have no more money :(")
         self.sleep(1)
@@ -66,7 +94,7 @@ class SimpleGame(TerminalApp):
         '''Prompts for the users bet and horse'''
         self.send("Which horse do you want to bet on? ")
         for i, horse in enumerate(horse_list):
-            self.send("{}) {}".format(i+1, horse))
+            self.send("{}) {} ({} wins)".format(i+1, horse, self.wins.get(horse, 0)))
         chosen = None
         while chosen not in range(1, len(horse_list) + 1):
             key = self.read_key("? ")
@@ -117,9 +145,9 @@ class SimpleGame(TerminalApp):
         self.sleep(2)
         self.send("I don't believe this")
 
-        if order[0] == winner:
+        if horse_list[order[0]] == winner:
             self.sleep(2)
-            self.send("{} has just overtaken".format(short(order[2])))
+            self.send("{} has just overtaken".format(short_horse(order[2])))
             self.sleep(1)
             self.send("but is falling behind")
         else:
@@ -128,6 +156,13 @@ class SimpleGame(TerminalApp):
 
         self.sleep(2)
         self.send("And the winner is {}".format(winner))
+
+        if winner not in self.wins:
+            self.wins[winner] = 1
+        else:
+            self.wins[winner] += 1
+
+        self.save_wins()
         return winner
 
 
