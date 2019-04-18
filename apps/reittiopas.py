@@ -8,7 +8,7 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_STOP = "HSL:1432164"
+DEFAULT_STOP = "1432164" # HSL:1432164
 
 
 class Reittiopas(TerminalApp):
@@ -21,52 +21,29 @@ class Reittiopas(TerminalApp):
 
     client = Client(transport=_transport, fetch_schema_from_transport=True,)
 
-    def prompt(self, text=""):
-        '''Sends a question waits for a response
-
-        game.promt("What is your name? ")
-        user then presses types a response and return key
-        and this function returns that response
-
-        CASE-SENSITIVE
-        '''
-        self.send(text, trailing_newline=False)
-        response = self.read_line()
-        return response
-
     def start(self):
         self.send("Welcome to Reittiopas")
 
-        stop_id = self.prompt("\nPlease enter stop ID (feed:number, e.g., {0}): ".format(DEFAULT_STOP))
+        stop_id = self.prompt("\nPlease enter stop number (without feed, e.g., {0} for HSL:{0}): ".format(DEFAULT_STOP))
         if stop_id == '':
-            stop_id = DEFAULT_STOP
+            stop_id = 'HSL:' + DEFAULT_STOP
+        else:
+            stop_id = 'HSL:' + stop_id
 
-#        query = gql("""
-#        {
-#          stop(id: "HSL:1432164") {
-#            name
-#            stoptimesWithoutPatterns {
-#              scheduledArrival
-#              realtimeArrival
-#              arrivalDelay
-#              scheduledDeparture
-#              realtimeDeparture
-#              departureDelay
-#              realtime
-#              realtimeState
-#              serviceDay
-#              headsign
-#              trip {
-#                route{
-#                  shortName
-#                }
-#              }
-#            }
-#          }  
-#        }
-#        """)
-
-        query = gql('query($stopId:String!) {stop(id: $stopId) {name stoptimesWithoutPatterns{ scheduledDeparture realtime headsign trip{ route{ shortName } } } } }')
+        query = gql("""query($stopId:String!) {
+          stop(id: $stopId) {
+            name stoptimesWithoutPatterns {
+              scheduledDeparture
+              realtime
+              headsign
+              trip {
+                route {
+                  shortName
+                }
+              }
+            }
+          }
+        }""")
 
         try:
             result = self.client.execute(query, variable_values={"stopId": stop_id})
