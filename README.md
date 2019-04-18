@@ -9,3 +9,7 @@ Unfortunately it only sends in uppercase so using it as a modern day terminal al
 Make a new class somewhere in `apps/`. Inherit `TerminalApp` follow the docstring
 
 use `python mainterminal.py --dummy` to prototype
+
+### Reittiopas application
+
+![Reittiopas stop-id](reittiopas.png)
