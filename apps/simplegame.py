@@ -21,9 +21,7 @@ class SimpleGame(TerminalApp):
     house_balance = 0
     wins_file = '.horse_data'
 
-
     def start(self):
-
         self.load_wins()
         self.send("Welcome to the Horse races")
 

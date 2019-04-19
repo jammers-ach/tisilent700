@@ -24,13 +24,3 @@ class Shell(TerminalApp):
     def start(self):
 
         self.print_broken_keys()
-
-        io = TiIO(self.serial)
-
-        p = subprocess.Popen('sh', bufsize=0,
-                             preexec_fn=os.setsid,
-                             stdout=io,
-                             stderr=io, shell=True)
-
-        while p.poll() is None:
-            pass
