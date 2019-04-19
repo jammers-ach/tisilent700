@@ -65,11 +65,11 @@ class SimpleGame(TerminalApp):
                 self.money -= bet
                 winner = self.race(horse_list)
                 if winner != horse:
-                    self.send("Unlucky!!!")
+                    self.send("Unlucky!!! ", trailing_newline=False)
                     self.sleep(1)
                     self.send("You lost ${}".format(bet))
                 else:
-                    self.send("Congratulations!!!")
+                    self.send("Congratulations!!! ", trailing_newline=False)
                     self.sleep(1)
                     winnings = bet * len(horse_list)
                     self.send("You won ${}".format(winnings))
@@ -91,16 +91,8 @@ class SimpleGame(TerminalApp):
     def get_bet(self, horse_list):
         '''Prompts for the users bet and horse'''
         self.send("Which horse do you want to bet on? ")
-        for i, horse in enumerate(horse_list):
-            self.send("{}) {} ({} wins)".format(i+1, horse, self.wins.get(horse, 0)))
-        chosen = None
-        while chosen not in range(1, len(horse_list) + 1):
-            key = self.read_key("? ")
-            try:
-                chosen = int(key)
-            except ValueError:
-                chosen = None
-        chosen = horse_list[chosen - 1]
+        index = self.multiple_choices(["{} - {} wins".format(horse, self.wins.get(horse, 0)) for horse in horse_list])
+        chosen = horse_list[index]
 
         self.send("\nAnd how much do you want to bet on {}?".format(chosen))
         bet = None
@@ -129,23 +121,23 @@ class SimpleGame(TerminalApp):
         random.shuffle(order)
 
         self.sleep(2)
-        self.send("And they're off")
+        self.send("And they're off. ", trailing_newline=False)
         self.sleep(1)
-        self.send("{} is off to a flying start".format(short_horse(order[0])))
-        self.sleep(1)
-        self.send("{} is in a close second".format(short_horse(order[1])))
-        self.sleep(1)
-        self.send("{} is still behind".format(short_horse(order[2])))
-        self.sleep(1)
+        self.send("{} is off to a flying start. ".format(short_horse(order[0])), trailing_newline=False)
+        self.sleep(2)
+        self.send("{} is in a close second. ".format(short_horse(order[1])))
+        self.sleep(3)
+        self.send("{} is still behind. ".format(short_horse(order[2])), trailing_newline=False)
+        self.sleep(2)
         self.send("{} is catching up".format(short_horse(order[3])))
         self.sleep(2)
-        self.send("But wait.....")
+        self.send("But wait..... ", trailing_newline=False)
         self.sleep(2)
-        self.send("I don't believe this")
+        self.send("I don't believe this. ", trailing_newline=False)
 
         if horse_list[order[0]] == winner:
             self.sleep(2)
-            self.send("{} has just overtaken".format(short_horse(order[2])))
+            self.send("{} has just overtaken. ".format(short_horse(order[2])), trailing_newline=False)
             self.sleep(1)
             self.send("but is falling behind")
         else:
