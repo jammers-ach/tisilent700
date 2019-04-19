@@ -13,7 +13,10 @@ class MainTerminal(TerminalApp):
 
     def start(self):
         self.apps = all_apps()
-        self.runmenu()
+        try:
+            self.runmenu()
+        except InterruptException:
+            logger.info("Terminal shut down or exited")
 
     def runmenu(self):
         while True:
@@ -34,18 +37,11 @@ class MainTerminal(TerminalApp):
             self.send((" "*leading_spaces) + banner)
             self.print_broken_keys()
 
-            try:
-                app = self.prompt_applist()
-            except InterruptException:
-                logger.info("interrupted")
-                continue
+            app = self.prompt_applist()
 
-            try:
-                a = app(self.serial)
-                logger.info("They chose %s", app.__class__)
-                a.start()
-            except InterruptException:
-                self.send("\n\nExit\n")
+            a = app(self.serial)
+            logger.info("They chose %s", app.__class__)
+            a.start()
 
 
 
