@@ -1,12 +1,10 @@
 import logging
 from datetime import datetime
+from .conn import InterruptException
 import time
 
 logger = logging.getLogger(__name__)
 
-
-class InterruptException(Exception):
-    pass
 
 class TerminalApp():
     '''Base class for a terminal game
@@ -64,7 +62,8 @@ class TerminalApp():
 
         We expect the serial port to be in half duplex so its our
         responsibility to echo'''
-        read_char = self.serial.read(1).decode('ascii')
+        value = self.serial.read(1)
+        read_char = value.decode('ascii')
         return read_char
 
     def read_key(self, text=""):
@@ -85,10 +84,7 @@ class TerminalApp():
         t2 = datetime.now()
         elapsed  = (t2 - t1).total_seconds()
 
-        if value == b'\0':
-            raise InterruptException
-        else:
-            if seconds - elapsed <= 0:
-                return
-            self.sleep(seconds - elapsed)
+        if seconds - elapsed <= 0:
+            return
+        self.sleep(seconds - elapsed)
 

@@ -11,6 +11,8 @@ brokenkeys_lookup = {
     '-': 'G'
 }
 
+class InterruptException(Exception):
+    pass
 
 class BrokenSerialIO(serial.Serial):
     '''A wrapper around the serial io, to handle
@@ -48,6 +50,8 @@ class BrokenSerialIO(serial.Serial):
                 if c == b'\r':
                     self.write('\r\n'.encode('ascii'))
                     line.append(b'\n')
+                elif c == b'\0':
+                    raise InterruptException
                 else:
                     c = self._replace(c)
                     self.write(c)
@@ -98,10 +102,14 @@ class DummySerial(io.IOBase):
             time.sleep(self.timeout)
             return
 
-        if self.echo:
-            char = getch.getche()
-        else:
-            char = getch.getch()
+        try:
+            if self.echo:
+                char = getch.getche()
+            else:
+                char = getch.getch()
+        except KeyboardInterrupt:
+            raise InterruptException
+
         return char.encode('ascii')
 
     def write(self, data):

@@ -1,6 +1,11 @@
 import pkgutil
 import inspect
+import logging
+
 from ti700.app import TerminalApp
+
+
+logger = logging.getLogger(__name__)
 
 def all_apps():
     apps = []
@@ -12,6 +17,6 @@ def all_apps():
             if name.startswith('__'):
                 continue
             if inspect.isclass(value) and issubclass(value, TerminalApp) and value != TerminalApp:
-                print(name)
+                logger.debug(name)
                 apps.append(value)
     return apps

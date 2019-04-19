@@ -1,26 +1,34 @@
 import logging
+import serial
 
-from ti700.conn import BrokenSerialIO, DummySerial
-from ti700.app import TerminalApp, InterruptException
+from ti700.conn import BrokenSerialIO, DummySerial, InterruptException
+from ti700.app import TerminalApp
 
 from apps import all_apps
 
 logger = logging.getLogger(__name__)
 
 
-class SleepTest(TerminalApp):
-    appname = "Sleep test"
-
-    def start(self):
-        self.send("sleep test")
-        self.sleep(60)
-        self.send("seleep over")
-
 class MainTerminal(TerminalApp):
 
     def start(self):
         self.apps = all_apps()
+        self.runmenu()
+
+    def runmenu(self):
         while True:
+            logger.info("Starting app")
+
+            # When the terminal first starts, it sends null
+            # So we should wait for that if we're a real terminal
+            if (isinstance(self.serial, BrokenSerialIO)):
+                logger.info("waiting for terminal switch on")
+                try:
+                    self.read_key("")
+                except InterruptException:
+                    pass
+
+
             banner = "TI Slient 700 app"
             leading_spaces = int((self.terminal_width - len(banner)) / 4)
             self.send((" "*leading_spaces) + banner)
@@ -29,10 +37,12 @@ class MainTerminal(TerminalApp):
             try:
                 app = self.prompt_applist()
             except InterruptException:
-                pass
+                logger.info("interrupted")
+                continue
 
             try:
                 a = app(self.serial)
+                logger.info("They chose %s", app.__class__)
                 a.start()
             except InterruptException:
                 self.send("\n\nExit\n")
@@ -66,6 +76,10 @@ if __name__ == '__main__':
                         help="Use stdin/out rather than serial port")
 
     args = parser.parse_args()
+
+    if not args.dummy:
+        logging.basicConfig(level=logging.DEBUG)
+
 
     connection = DummySerial() if args.dummy else BrokenSerialIO()
     tg = MainTerminal(connection)
