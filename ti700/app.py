@@ -88,3 +88,23 @@ class TerminalApp():
             return
         self.sleep(seconds - elapsed)
 
+
+
+    def multiple_choices(self, choices, prompt='?'):
+        '''
+        given ['foo','bar','baz']
+        prints: (1) foo, (2) bar, (3) baz
+        and prompts for a response
+        '''
+        for i, a in enumerate(choices):
+            self.send('({}) {} '.format(i+1, a), trailing_newline=False)
+        self.send("")
+
+        chosen = None
+        while chosen not in range(1, len(choices) + 1):
+            key = self.read_key(prompt)
+            try:
+                chosen = int(key)
+            except ValueError:
+                chosen = None
+        return chosen -1

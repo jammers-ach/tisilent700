@@ -48,18 +48,8 @@ class MainTerminal(TerminalApp):
     def prompt_applist(self):
         '''Prompts the user for the chosen app,
         returns the class of the app they chose'''
-        for i, app in enumerate(self.apps):
-            app_name = app._name()
-            self.send("{}) for {}".format(i+1, app_name))
-
-        chosen = None
-        while chosen not in range(1, len(self.apps) + 1):
-            key = self.read_key("? ")
-            try:
-                chosen = int(key)
-            except ValueError:
-                chosen = None
-        return self.apps[chosen-1]
+        chosen = self.multiple_choices([app._name() for app in self.apps])
+        return self.apps[chosen]
 
 
 if __name__ == '__main__':
