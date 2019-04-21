@@ -40,7 +40,7 @@ class MainTerminal(TerminalApp):
             app = self.prompt_applist()
 
             a = app(self.serial)
-            logger.info("They chose %s", app.__class__)
+            logger.info("They chose %s", a.__class__)
             a.start()
 
 
