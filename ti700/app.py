@@ -96,15 +96,13 @@ class TerminalApp():
         prints: (1) foo, (2) bar, (3) baz
         and prompts for a response
         '''
+        options = [chr(ord('a') + i) for i in range(len(choices))]
         for i, a in enumerate(choices):
-            self.send('({}) {} '.format(i+1, a), trailing_newline=False)
+            self.send('({}) {} '.format(options[i], a), trailing_newline=False)
         self.send("")
 
         chosen = None
-        while chosen not in range(1, len(choices) + 1):
+        while chosen not in options:
             key = self.read_key(prompt)
-            try:
-                chosen = int(key)
-            except ValueError:
-                chosen = None
-        return chosen -1
+            chosen = key.lower()
+        return options.index(chosen)

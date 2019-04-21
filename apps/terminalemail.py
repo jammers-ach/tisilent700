@@ -28,18 +28,28 @@ def readmail(mark_seen=True):
     mail = imaplib.IMAP4_SSL(SMTP_SERVER)
     mail.login(FROM_EMAIL,FROM_PWD)
     mail.select('inbox')
-    type, data = mail.search(None, 'ALL')
+    response, data = mail.search(None, 'UNSEEN')
+
+    if response != 'OK':
+        logger.info("imap response wans't ok: %s", response)
+        return
     mail_ids = data[0]
+
+    if mail_ids == b'':
+        logger.info("no new email")
+        return []
 
     id_list = mail_ids.split()
     first_email_id = int(id_list[0])
     latest_email_id = int(id_list[-1])
 
+    ids = range(latest_email_id,first_email_id, -1) if first_email_id != latest_email_id else [first_email_id]
 
     mails = []
-    for i in range(latest_email_id,first_email_id, -1):
+    for i in ids:
         typ, data = mail.fetch('{}'.format(i), '(RFC822)' )
         if mark_seen:
+            logger.info("Marking %d as seen", i)
             mail.store('{}'.format(i),'+FLAGS','\Seen')
 
         for response_part in data:
@@ -86,10 +96,13 @@ class EmailApp(TerminalApp):
         if FROM_PWD is None or FROM_EMAIL is None:
             self.send("There are no email credentials, exiting")
             return
+        else:
+            self.send("Email checker started")
 
-        mails = readmail()
         while True:
+            mails = readmail()
             for mail in mails:
                 logger.info("Received an email from %s", mail['from'])
                 self.send(format_email(mail))
+                self.sleep(1)
             self.sleep(SLEEP_TIME)
