@@ -5,10 +5,11 @@ from gql.transport.requests import RequestsHTTPTransport
 import time
 import logging
 import requests
+import os
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_STOP = "1432164" # HSL:1432164
+DEFAULT_STOP = os.getenv('DEFAULT_STOP', "1432164") # HSL:1432164
 
 
 class Reittiopas(TerminalApp):
