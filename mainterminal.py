@@ -32,7 +32,7 @@ class MainTerminal(TerminalApp):
                     pass
 
 
-            banner = "TI Slient 700 app"
+            banner = "TI Silent 700 app"
             leading_spaces = int((self.terminal_width - len(banner)) / 4)
             self.send((" "*leading_spaces) + banner)
             self.print_broken_keys()
