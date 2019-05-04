@@ -20,8 +20,6 @@ class Reittiopas(TerminalApp):
         use_json=True,
     )
 
-    client = Client(transport=_transport, fetch_schema_from_transport=True,)
-
     def start(self):
         self.send("Welcome to Reittiopas")
 
@@ -47,7 +45,8 @@ class Reittiopas(TerminalApp):
         }""")
 
         try:
-            result = self.client.execute(query, variable_values={"stopId": stop_id})
+            client = Client(transport=self._transport, fetch_schema_from_transport=True,)
+            result = client.execute(query, variable_values={"stopId": stop_id})
             
             stop_name = result['stop']['name']
             transports = result['stop']['stoptimesWithoutPatterns']
