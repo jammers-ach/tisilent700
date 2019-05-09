@@ -13,7 +13,7 @@ DEFAULT_STOP = os.getenv('DEFAULT_STOP', "1432164") # HSL:1432164
 
 
 class Reittiopas(TerminalApp):
-    appname = "next bus / train from Reittiopas"
+    appname = "Reittiopas"
 
     _transport = RequestsHTTPTransport(
         url='https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql',
@@ -25,7 +25,7 @@ class Reittiopas(TerminalApp):
     def start(self):
         self.send("Welcome to Reittiopas")
 
-        stop_id = self.prompt("\nPlease enter stop number (without feed, e.g., {0} for HSL:{0}): ".format(DEFAULT_STOP))
+        stop_id = self.prompt("\nenter stop number (e.g., {0} for HSL:{0}): ".format(DEFAULT_STOP))
         if stop_id == '':
             stop_id = 'HSL:' + DEFAULT_STOP
         else:
@@ -48,7 +48,7 @@ class Reittiopas(TerminalApp):
 
         try:
             result = self.client.execute(query, variable_values={"stopId": stop_id})
-            
+
             stop_name = result['stop']['name']
             transports = result['stop']['stoptimesWithoutPatterns']
 
