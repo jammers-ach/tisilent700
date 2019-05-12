@@ -1,4 +1,6 @@
 backcall==0.1.0
+beautifulsoup4==4.7.1
+bs4==0.0.1
 certifi==2019.3.9
 chardet==3.0.4
 decorator==4.4.0
@@ -22,6 +24,7 @@ python-dateutil==2.8.0
 requests==2.21.0
 Rx==1.6.1
 six==1.12.0
+soupsieve==1.9.1
 traitlets==4.3.2
 urllib3==1.24.3
 wcwidth==0.1.7
